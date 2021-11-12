@@ -1,0 +1,16 @@
+{% extends "loggedin.html" %}
+{% block heading %}
+<title>Dashboard</title>
+{% endblock %}
+
+{% block body %}
+    <div class = "container">
+        <form class = "search_book" action = "{{ url_for('search') }}" method = "post">
+          <div class="form-group">
+                <label for="search">Search for a book</label>
+                <input name = "search_books" id = "search" class="form-control" type="text" placeholder="Search for a book based ISBN, Name, or Author" autocomplete="off">
+                <button type="submit" class="btn btn-primary" name = "search_button">Submit</button>
+          </div>
+        </form>
+    </div>
+{% endblock %}

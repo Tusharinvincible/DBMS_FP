@@ -1,0 +1,69 @@
+{% extends "loggedin.html" %}
+{% block heading %}
+<title>Book</title>
+{% endblock %}
+
+{% block body %}
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4" style="display: inline;">{{ book.title.title() }}</h1>
+        <h2 class="display-4" style="display: inline; margin-left: 70%">{{ book.average_score }}/5</h2>
+        <p class="lead">By {{ book.author.title() }} pubhlished in {{ book.year }}. ISBN - {{ book.isbn }}</p>
+
+      </div>
+    </div>
+    <div class = "container">
+        <h4>Write a Review?</h4>
+        <form class="was-validated" action = "{{ url_for('review', book_id = book.isbn) }}" method = "post">
+          <div class="form-group row mb-3">
+            <label for="validationTextarea">Your Review</label>
+            <textarea class="form-control is-invalid" id="validationTextarea" placeholder="Share your thoughts" name = "user_review" required></textarea>
+          </div>
+            <fieldset>
+                <div class = "row">
+                    <legend class="col-form-label col-sm-2 pt-0">Your Rating!</legend>
+                  <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" id="customControlValidation5" value = 5 name="rating" required>
+                    <label class="custom-control-label" for="customControlValidation5">5 </label>
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" id="customControlValidation4" value = 4 name="rating" required>
+                    <label class="custom-control-label" for="customControlValidation4">4 </label>
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" id="customControlValidation3" value = 3 name="rating" required>
+                    <label class="custom-control-label" for="customControlValidation3">3 </label>
+                  </div>
+                  <div class="custom-control custom-radio">
+                    <input type="radio" class="custom-control-input" id="customControlValidation2" value = 2 name="rating" required>
+                    <label class="custom-control-label" for="customControlValidation2">2 </label>
+                  </div>
+                  <div class="custom-control custom-radio mb-3">
+                    <input type="radio" class="custom-control-input" id="customControlValidation1" value = 1 name="rating" required>
+                    <label class="custom-control-label" for="customControlValidation1">1 </label>
+                    <div class="invalid-feedback">Please Choose a Rating</div>
+                  </div>
+                </div>
+            </fieldset>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <br>
+        <small style="color: red;">{{ message }}</small>
+        </form>
+    </div>
+    <div class = "container">
+        <h3>Reviews</h3>
+            {% for rev in reviews%}
+                <div class = "container">
+                    <div class="card text-white bg-dark mb-3" style="max-width: 72rem; margin: 0 auto;">
+                      <div class="card-header">
+                        {{ rev.username }}
+                      </div>
+                      <div class="card-body">
+                        <p class="card-text">{{ rev.review }}</p>
+                      </div>
+                    </div>
+                </div>
+            {% endfor %}
+    </div>
+
+{% endblock %}

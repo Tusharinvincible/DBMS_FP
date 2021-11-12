@@ -1,0 +1,12 @@
+{% extends "loggedin.html" %}
+{% block heading %}
+<title>Books</title>
+{% endblock %}
+
+{% block body %}
+    <ul>
+        {% for book in books %}
+            <li><a href = "{{url_for('book', book_id = book.isbn)}}">{{book.title.title()}} by {{book.author.title()}} in {{book.year}}<a></a>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -8,48 +8,44 @@ import requests
 
 app = Flask(__name__)
 
-# postgresql://postgres:nerf123@localhost:5432/book_rec
-# mysql+pymysql://root:nerf@localhost:3306/book_rec
-
 # Set up database
-engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/book_rec")
+engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/movie_rec")
 db = scoped_session(sessionmaker(bind=engine))
 
-api_key = "AIzaSyDVg6bM4M57n49SZ5bHEeaZhoBiXJZMm5Q"
+api_key = "877ae90400e9739d4b1c98174be39af4"
 
 def main():
     create_tables()
-    with open("books.csv", "r") as books:
-        reader = csv.reader(books)
-        next(reader)
-        for isbn, title, author, year in reader:
+    for i in range(2, 2000):
+        
+        try:
+            title, year, author, rating, count = get_movie_key(i)
             print(f"Adding {title.lower().strip()}")
-            try:
-                count, rating = get_book_key(isbn)
-                db.execute("INSERT INTO books(isbn, title, author, year, rating_count, average_score) VALUES(:isbn, :title, :author, :year, :rating_count, :average_score)",{"isbn":isbn, "title":title.lower().strip(), "author":author.lower().strip(), "year":int(year), "rating_count":int(count), "average_score":float(rating)})
-            except:
-                print("Error Occured")
+            db.execute("INSERT INTO movies(movieid, title, author, year, rating_count, average_score) VALUES(:movieid, :title, :author, :year, :rating_count, :average_score)",{"movieid":i, "title":title.lower().strip(), "author":author.lower().strip(), "year":int(year), "rating_count":int(count), "average_score":float(rating)})
+        except:
+            print(i, "Error Occured")
     db.commit()
 
 def create_tables():
     print("Creating Tables")
-    db.execute("CREATE TABLE IF NOT EXISTS books(isbn VARCHAR(255), title VARCHAR(255), author VARCHAR(255), year INTEGER, rating_count INTEGER, average_score FLOAT, PRIMARY KEY(isbn));")
+    db.execute("CREATE TABLE IF NOT EXISTS movies(movieid VARCHAR(255), title VARCHAR(255), author VARCHAR(255), year INTEGER, rating_count INTEGER, average_score FLOAT, PRIMARY KEY(movieid));")
     db.commit()
 
 def showtables():
-    books = db.execute("SELECT * FROM books").fetchall()
-    for book in books:
-        print(f"{book.isbn} {book.title} {book.author} {book.year}")
+    movies = db.execute("SELECT * FROM movies").fetchall()
+    for movie in movies:
+        print(f"{movie.title} {movie.author} {movie.year}")
 
 
-def get_book_key(isbn):
-    #https://www.googleapis.com/books/v1/volumes?q=isbn:9780552152679&key?=AIzaSyDVg6bM4M57n49SZ5bHEeaZhoBiXJZMm5Q
-    res = requests.get(f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&key?={api_key}")
+def get_movie_key(movie_id):
+    #https://api.themoviedb.org/3/movie/550?api_key=877ae90400e9739d4b1c98174be39af4
+    
+    res = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}")
     details = res.json()
-    print(details)
-    print(details["items"][0]["volumeInfo"]["ratingsCount"], details["items"][0]["volumeInfo"]["averageRating"])
+    
+    print(details["original_title"], details["release_date"][:4], details["production_companies"][0]["name"], details["vote_average"], details["vote_count"])
 
-    return (details["items"][0]["volumeInfo"]["ratingsCount"], details["items"][0]["volumeInfo"]["averageRating"])
+    return (details["original_title"], details["release_date"][:4], details["production_companies"][0]["name"], details["vote_average"], details["vote_count"])
 
 if(__name__ == "__main__"):
     main()

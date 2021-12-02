@@ -14,21 +14,21 @@ Session(app)
 
 # Set up database
 # os.getenv("DATABASE_URL")
-engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/book_rec")
+engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/movie_rec")
 db = scoped_session(sessionmaker(bind=engine))
 
 def create_reviews_tables():
-    db.execute("CREATE TABLE IF NOT EXISTS reviews(id INT, username VARCHAR(255), isbn VARCHAR(255), review VARCHAR(255), rating INTEGER, FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,  FOREIGN KEY (isbn) REFERENCES books(isbn) ON DELETE CASCADE)")
+    db.execute("CREATE TABLE IF NOT EXISTS reviews(id INT, username VARCHAR(255), movieid VARCHAR(255), review VARCHAR(255), rating INTEGER, FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,  FOREIGN KEY (movieid) REFERENCES movies(movieid) ON DELETE CASCADE)")
     db.commit()
 
 def create_users_table():
     db.execute("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT, username VARCHAR(255), email VARCHAR(255), password VARCHAR(255), PRIMARY KEY(id))")
     db.commit()
 
-def show_reviews_table(isbn):
-    reviews = db.execute("SELECT * FROM reviews WHERE isbn=:isbn", {"isbn":isbn})
+def show_reviews_table(movieid):
+    reviews = db.execute("SELECT * FROM reviews WHERE movieid=:movieid", {"movieid":movieid})
     for review in reviews:
-        print(review.users, review.username, review.isbn, review.review, review.rating)
+        print(review.users, review.username, review.movieid, review.review, review.rating)
 
 @app.route("/")
 def index():
@@ -89,65 +89,65 @@ def logout():
 def search():
     if(request.method == "GET"):
         return redirect(url_for("dashboard"))
-    search_query = request.form.get("search_books").lower().strip()
-    books = db.execute(f"SELECT * FROM books WHERE isbn LIKE '%{search_query}%'").fetchall()
-    #books = db.execute("SELECT * FROM books WHERE isbn LIKE '%:isbn%'",{"isbn": search_query}).fetchall()
+    search_query = request.form.get("search_movies").lower().strip()
+    movies = db.execute(f"SELECT * FROM movies WHERE movieid LIKE '%{search_query}%'").fetchall()
+    #movies = db.execute("SELECT * FROM movies WHERE movieid LIKE '%:movieid%'",{"movieid": search_query}).fetchall()
 
-    books.extend(db.execute(f"SELECT * FROM books WHERE title LIKE '%{search_query}%'").fetchall())
-    #books = db.execute("SELECT * FROM books WHERE title LIKE '%:title%'",{"title": search_query}).fetchall()
+    movies.extend(db.execute(f"SELECT * FROM movies WHERE title LIKE '%{search_query}%'").fetchall())
+    #movies = db.execute("SELECT * FROM movies WHERE title LIKE '%:title%'",{"title": search_query}).fetchall()
 
-    books.extend(db.execute(f"SELECT * FROM books WHERE author LIKE '%{search_query}%'").fetchall())
-    #books = db.execute("SELECT * FROM books WHERE author LIKE '%:author%'",{"author": search_query}).fetchall()
-    return render_template("search.html", user = session["user"], books = books)
+    movies.extend(db.execute(f"SELECT * FROM movies WHERE author LIKE '%{search_query}%'").fetchall())
+    #movies = db.execute("SELECT * FROM movies WHERE author LIKE '%:author%'",{"author": search_query}).fetchall()
+    return render_template("search.html", user = session["user"], movies = movies)
 
-@app.route("/book/<string:book_id>")
-def book(book_id):
+@app.route("/movie/<string:movie_id>")
+def movie(movie_id):
     create_reviews_tables()
-    book = db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":book_id}).fetchone()
-    reviews = db.execute("SELECT * FROM reviews WHERE isbn = :isbn",{"isbn":book_id}).fetchall()
-    return render_template("book.html", user = session["user"], book = book, reviews = reviews, message = "")
+    movie = db.execute("SELECT * FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
+    reviews = db.execute("SELECT * FROM reviews WHERE movieid = :movieid",{"movieid":movie_id}).fetchall()
+    return render_template("movie.html", user = session["user"], movie = movie, reviews = reviews, message = "")
 
-@app.route("/review/<string:book_id>", methods = ["POST"])
-def review(book_id):
+@app.route("/review/<string:movie_id>", methods = ["POST"])
+def review(movie_id):
     user_review =  request.form.get("user_review")
     user_rating = int(request.form.get("rating"))
     users =  db.execute("SELECT * FROM users").fetchall()
-    book_data = db.execute("SELECT rating_count, average_score FROM books WHERE isbn = :isbn",{"isbn":book_id}).fetchone()
-    rating_count = book_data[0]
-    average_score = book_data[1]
-    if(db.execute("SELECT * FROM reviews WHERE id = :userid AND isbn = :isbn", {"userid":session["user"].id, "isbn":book_id}).fetchone() is None):
-        db.execute("INSERT INTO reviews (id, username, isbn, review, rating) VALUES (:id, :username, :isbn, :review, :rating)", {"id":session["user"].id, "username":session["user"].username, "isbn":book_id, "review":user_review, "rating": user_rating})
+    movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
+    rating_count = movie_data[0]
+    average_score = movie_data[1]
+    if(db.execute("SELECT * FROM reviews WHERE id = :userid AND movieid = :movieid", {"userid":session["user"].id, "movieid":movie_id}).fetchone() is None):
+        db.execute("INSERT INTO reviews (id, username, movieid, review, rating) VALUES (:id, :username, :movieid, :review, :rating)", {"id":session["user"].id, "username":session["user"].username, "movieid":movie_id, "review":user_review, "rating": user_rating})
         db.commit()
     else:
-        reviews = db.execute("SELECT * FROM reviews WHERE isbn = :isbn",{"isbn":book_id}).fetchall()
-        book = db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":book_id}).fetchone()
-        return render_template("book.html", user = session["user"], book = book, reviews = reviews, message = "You have already Written a review for this book")
+        reviews = db.execute("SELECT * FROM reviews WHERE movieid = :movieid",{"movieid":movie_id}).fetchall()
+        movie = db.execute("SELECT * FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
+        return render_template("movie.html", user = session["user"], movie = movie, reviews = reviews, message = "You have already Written a review for this movie")
 
     total_rating = int(average_score * rating_count)
     rating_count+=1
     average_score = (total_rating + user_rating)/rating_count
-    db.execute("UPDATE books SET rating_count = :rating_count, average_score = :average_score WHERE isbn = :isbn", {"rating_count":rating_count, "average_score":average_score, "isbn":book_id})
-    book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn":book_id}).fetchone()
+    db.execute("UPDATE movies SET rating_count = :rating_count, average_score = :average_score WHERE movieid = :movieid", {"rating_count":rating_count, "average_score":average_score, "movieid":movie_id})
+    movie = db.execute("SELECT * FROM movies WHERE movieid = :movieid", {"movieid":movie_id}).fetchone()
     db.commit()
-    return redirect(url_for("book", book_id = book_id))
+    return redirect(url_for("movie", movie_id = movie_id))
 
-@app.route("/api/<string:book_id>")
-def get_book_api(book_id):
+@app.route("/api/<string:movie_id>")
+def get_movie_api(movie_id):
     # {
     # "title": "Memory",
     # "author": "Doug Lloyd",
     # "year": 2015,
-    # "isbn": "1632168146",
+    # "movieid": "1632168146",
     # "review_count": 28,
     # "average_score": 5.0
     # }
     # Required Response
-    book_details = db.execute("SELECT * FROM books WHERE isbn = :isbn",{"isbn":book_id}).fetchone()
-    book_dict = {}
-    book_dict["title"] = book_details.title
-    book_dict["author"] = book_details.author
-    book_dict["year"] = book_details.year
-    book_dict["isbn"] = book_details.isbn
-    book_dict["review_count"] = book_details.rating_count
-    book_dict["average_score"] = book_details.average_score
-    return jsonify(book_dict)
+    movie_details = db.execute("SELECT * FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
+    movie_dict = {}
+    movie_dict["title"] = movie_details.title
+    movie_dict["author"] = movie_details.author
+    movie_dict["year"] = movie_details.year
+    movie_dict["movieid"] = movie_details.movieid
+    movie_dict["review_count"] = movie_details.rating_count
+    movie_dict["average_score"] = movie_details.average_score
+    return jsonify(movie_dict)

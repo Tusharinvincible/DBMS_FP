@@ -1,20 +1,20 @@
 {% extends "loggedin.html" %}
 {% block heading %}
-<title>Book</title>
+<title>movie</title>
 {% endblock %}
 
 {% block body %}
     <div class="jumbotron jumbotron-fluid">
       <div class="container">
-        <h1 class="display-4" style="display: inline;">{{ book.title.title() }}</h1>
-        <h2 class="display-4" style="display: inline; margin-left: 70%">{{ book.average_score }}/5</h2>
-        <p class="lead">By {{ book.author.title() }} pubhlished in {{ book.year }}. ISBN - {{ book.isbn }}</p>
+        <h1 class="display-4" style="display: inline;">{{ movie.title.title() }}</h1>
+        <h2 class="display-4" style="display: inline; margin-left: 70%">{{ movie.average_score }}/5</h2>
+        <p class="lead">By {{ movie.author.title() }} pubhlished in {{ movie.year }}. movieid - {{ movie.movieid }}</p>
 
       </div>
     </div>
     <div class = "container">
         <h4>Write a Review?</h4>
-        <form class="was-validated" action = "{{ url_for('review', book_id = book.isbn) }}" method = "post">
+        <form class="was-validated" action = "{{ url_for('review', movie_id = movie.movieid) }}" method = "post">
           <div class="form-group row mb-3">
             <label for="validationTextarea">Your Review</label>
             <textarea class="form-control is-invalid" id="validationTextarea" placeholder="Share your thoughts" name = "user_review" required></textarea>

@@ -1,9 +1,9 @@
 import os
+import hashlib
 from flask import Flask, session, render_template, request, redirect, url_for, jsonify, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-
 
 app = Flask(__name__)
 
@@ -22,7 +22,7 @@ def create_reviews_tables():
     db.commit()
 
 def create_users_table():
-    db.execute("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT, username VARCHAR(255), email VARCHAR(255), password VARCHAR(255), PRIMARY KEY(id))")
+    db.execute("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT, username VARCHAR(255), email VARCHAR(255), password VARCHAR(256), PRIMARY KEY(id))")
     db.commit()
 
 def show_reviews_table(movieid):
@@ -53,7 +53,7 @@ def dashboard():
             user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username")}).fetchone()
 
             if(user != None):
-                if(user.password == request.form.get("password")):
+                if(user.password == hashlib.sha256(request.form.get("password").encode()).hexdigest()):
                     session["user"] = user
                     return render_template("index.html", user = user)
                 else:
@@ -68,7 +68,7 @@ def dashboard():
             user_exists = db.execute("SELECT * FROM users WHERE username=:username", {"username":request.form.get("username")}).fetchone()
             if(user_exists != None):
                 return render_template("login.html", message = "A user with that username Already exists")
-            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", {"username":request.form.get("username"),"email":request.form.get("email"), "password":request.form.get("password")})
+            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", {"username":request.form.get("username"),"email":request.form.get("email"), "password":hashlib.sha256(request.form.get("password").encode()).hexdigest()})
             db.commit()
             user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username")}).fetchone()
             session["user"] = user

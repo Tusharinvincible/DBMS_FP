@@ -1,0 +1,21 @@
+{% extends "loggedin.html" %}
+{% block heading %}
+<title>movie</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block body %}
+    <div class = "container">
+        <h4>Edit a Review</h4>
+        <form class="was-validated" action = "{{ url_for('review_edit', review_id = review_id, movie_id = movie_id) }}" method = "post">
+          <div class="form-group row mb-3">
+            <label for="validationTextarea">Your Review</label>
+            <textarea class="form-control is-invalid" id="validationTextarea" placeholder="Share your thoughts" name = "user_review" required></textarea>
+          </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <br>
+        <small style="color: red;">{{ message }}</small>
+        </form>
+    </div>
+
+{% endblock %}

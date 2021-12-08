@@ -18,7 +18,7 @@ engine = create_engine("mysql+pymysql://root:tushar@localhost:3306/movie_rec")
 db = scoped_session(sessionmaker(bind=engine))
 
 def create_reviews_tables():
-    db.execute("CREATE TABLE IF NOT EXISTS reviews(id INT, username VARCHAR(255), movieid VARCHAR(255), review VARCHAR(255), rating INTEGER, FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,  FOREIGN KEY (movieid) REFERENCES movies(movieid) ON DELETE CASCADE)")
+    db.execute("CREATE TABLE IF NOT EXISTS reviews(review_id INT AUTO_INCREMENT, id INT, username VARCHAR(255), movieid VARCHAR(255), review VARCHAR(255), rating INTEGER, FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE,  FOREIGN KEY (movieid) REFERENCES movies(movieid) ON DELETE CASCADE, PRIMARY KEY(review_id))")
     db.commit()
 
 def create_users_table():
@@ -50,10 +50,10 @@ def dashboard():
     if(request.method == "POST"):
         if("loginsubmit" in request.form):
             create_users_table()
-            user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username")}).fetchone()
+            user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username").strip()}).fetchone()
 
             if(user != None):
-                if(user.password == hashlib.sha256(request.form.get("password").encode()).hexdigest()):
+                if(user.password == hashlib.sha256(request.form.get("password").strip().encode()).hexdigest()):
                     session["user"] = user
                     return render_template("index.html", user = user)
                 else:
@@ -65,12 +65,14 @@ def dashboard():
 
         else:
             create_users_table()
-            user_exists = db.execute("SELECT * FROM users WHERE username=:username", {"username":request.form.get("username")}).fetchone()
+            user_exists = db.execute("SELECT * FROM users WHERE username=:username", {"username":request.form.get("username").strip()}).fetchone()
             if(user_exists != None):
                 return render_template("login.html", message = "A user with that username Already exists")
-            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", {"username":request.form.get("username"),"email":request.form.get("email"), "password":hashlib.sha256(request.form.get("password").encode()).hexdigest()})
+            if(request.form.get("username").isdigit()):
+                return render_template("login.html", message = "A username should have letters in it")
+            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", {"username":request.form.get("username").strip(),"email":request.form.get("email").strip(), "password":hashlib.sha256(request.form.get("password").strip().encode()).hexdigest()})
             db.commit()
-            user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username")}).fetchone()
+            user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username").strip()}).fetchone()
             session["user"] = user
             return render_template("index.html", user = user)
     else:
@@ -109,9 +111,9 @@ def movie(movie_id):
 
 @app.route("/review/<string:movie_id>", methods = ["POST"])
 def review(movie_id):
-    user_review =  request.form.get("user_review")
+    user_review =  request.form.get("user_review").strip()
     user_rating = int(request.form.get("rating"))
-    users =  db.execute("SELECT * FROM users").fetchall()
+    # users =  db.execute("SELECT * FROM users").fetchall()
     movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
     rating_count = movie_data[0]
     average_score = movie_data[1]
@@ -130,6 +132,25 @@ def review(movie_id):
     movie = db.execute("SELECT * FROM movies WHERE movieid = :movieid", {"movieid":movie_id}).fetchone()
     db.commit()
     return redirect(url_for("movie", movie_id = movie_id))
+
+@app.route("/edit_post")
+def edit_post():
+    print(request.args.get('review_id'), request.args.get('movie_id'))
+    return render_template("edit_post.html", user = session["user"], review_id = request.args.get('review_id'), movie_id = request.args.get('movie_id'), message = "")
+
+@app.route("/review_edit", methods = ["POST"])
+def review_edit():
+    user_review =  request.form.get("user_review").strip()
+    #user_rating = int(request.form.get("rating"))
+    # users =  db.execute("SELECT * FROM users").fetchall()
+    #movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
+    #rating_count = movie_data[0]
+    #average_score = movie_data[1]
+    print(user_review, request.args.get('review_id'))
+    db.execute("UPDATE reviews SET review = :new_review WHERE review_id = :rev_id", {"new_review" : user_review,"rev_id":int(request.args.get('review_id'))})
+    db.commit()
+
+    return redirect(url_for("movie", movie_id = request.args.get('movie_id')))
 
 @app.route("/api/<string:movie_id>")
 def get_movie_api(movie_id):

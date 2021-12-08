@@ -146,6 +146,7 @@ def review_edit():
     #movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
     #rating_count = movie_data[0]
     #average_score = movie_data[1]
+    print(user_review, request.args.get('review_id'))
     db.execute("UPDATE reviews SET review = :new_review WHERE review_id = :rev_id", {"new_review" : user_review,"rev_id":int(request.args.get('review_id'))})
     db.commit()
 

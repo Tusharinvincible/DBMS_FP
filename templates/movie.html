@@ -24,24 +24,24 @@
                 <div class = "row">
                     <legend class="col-form-label col-sm-2 pt-0">Your Rating!</legend>
                     <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="customControlValidation5" value = 10 name="rating" required>
-                      <label class="custom-control-label" for="customControlValidation5">10 </label>
+                      <input type="radio" class="custom-control-input" id="customControlValidation10" value = 10 name="rating" required>
+                      <label class="custom-control-label" for="customControlValidation10">10 </label>
                     </div>
                     <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="customControlValidation5" value = 9 name="rating" required>
-                      <label class="custom-control-label" for="customControlValidation5">9 </label>
+                      <input type="radio" class="custom-control-input" id="customControlValidation9" value = 9 name="rating" required>
+                      <label class="custom-control-label" for="customControlValidation9">9 </label>
                     </div>
                     <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="customControlValidation5" value = 8 name="rating" required>
-                      <label class="custom-control-label" for="customControlValidation5">8 </label>
+                      <input type="radio" class="custom-control-input" id="customControlValidation8" value = 8 name="rating" required>
+                      <label class="custom-control-label" for="customControlValidation8">8 </label>
                     </div>
                     <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="customControlValidation5" value =7 name="rating" required>
-                      <label class="custom-control-label" for="customControlValidation5">7 </label>
+                      <input type="radio" class="custom-control-input" id="customControlValidation7" value =7 name="rating" required>
+                      <label class="custom-control-label" for="customControlValidation7">7 </label>
                     </div>
                     <div class="custom-control custom-radio">
-                      <input type="radio" class="custom-control-input" id="customControlValidation5" value = 6 name="rating" required>
-                      <label class="custom-control-label" for="customControlValidation5">6 </label>
+                      <input type="radio" class="custom-control-input" id="customControlValidation6" value = 6 name="rating" required>
+                      <label class="custom-control-label" for="customControlValidation6">6 </label>
                     </div>
                   <div class="custom-control custom-radio">
                     <input type="radio" class="custom-control-input" id="customControlValidation5" value = 5 name="rating" required>
@@ -79,7 +79,7 @@
                       <div class="card-header">
                         {{ rev.username }}
                         {% if rev.username == user.username %}
-                        <a href="{{ url_for('edit_post', review_id = rev.id, movie_id = movie.movieid) }}"><button class="edit_post" style="display: inline; float: right;border: none;"><i class="fa fa-edit"></i></button></a>
+                        <a href="{{ url_for('edit_post', review_id = rev.review_id, movie_id = movie.movieid) }}"><button class="edit_post" style="display: inline; float: right;border: none;"><i class="fa fa-edit"></i></button></a>
                           
                         {% endif %}
                       </div>

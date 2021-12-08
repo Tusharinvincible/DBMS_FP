@@ -79,7 +79,7 @@
                       <div class="card-header">
                         {{ rev.username }}
                         {% if rev.username == user.username %}
-                        <a href="{{ url_for('edit_post', review_id = rev.id, movie_id = movie.movieid) }}"><button class="edit_post" style="display: inline; float: right;border: none;"><i class="fa fa-edit"></i></button></a>
+                        <a href="{{ url_for('edit_post', review_id = rev.review_id, movie_id = movie.movieid) }}"><button class="edit_post" style="display: inline; float: right;border: none;"><i class="fa fa-edit"></i></button></a>
                           
                         {% endif %}
                       </div>

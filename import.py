@@ -9,7 +9,7 @@ import requests
 app = Flask(__name__)
 
 # Set up database
-engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/movie_rec")
+engine = create_engine("mysql+pymysql://root:tushar@localhost:3306/movie_rec")
 db = scoped_session(sessionmaker(bind=engine))
 
 api_key = "877ae90400e9739d4b1c98174be39af4"

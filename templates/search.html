@@ -6,7 +6,9 @@
 {% block body %}
     <ul>
         {% for movie in movies %}
+            <div>
             <li><a href = "{{url_for('movie', movie_id = movie.movieid)}}">{{movie.title.title()}} by {{movie.author.title()}} in {{movie.year}}<a></a>
+            </div>
         {% endfor %}
     </ul>
 {% endblock %}

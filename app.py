@@ -14,7 +14,7 @@ Session(app)
 
 # Set up database
 # os.getenv("DATABASE_URL")
-engine = create_engine("mysql+pymysql://root:nerf@localhost:3306/movie_rec")
+engine = create_engine("mysql+pymysql://root:tushar@localhost:3306/movie_rec")
 db = scoped_session(sessionmaker(bind=engine))
 
 def create_reviews_tables():

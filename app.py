@@ -114,9 +114,11 @@ def review(movie_id):
     user_review =  request.form.get("user_review").strip()
     user_rating = int(request.form.get("rating"))
     # users =  db.execute("SELECT * FROM users").fetchall()
+
     movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
     rating_count = movie_data[0]
     average_score = movie_data[1]
+
     if(db.execute("SELECT * FROM reviews WHERE id = :userid AND movieid = :movieid", {"userid":session["user"].id, "movieid":movie_id}).fetchone() is None):
         db.execute("INSERT INTO reviews (id, username, movieid, review, rating) VALUES (:id, :username, :movieid, :review, :rating)", {"id":session["user"].id, "username":session["user"].username, "movieid":movie_id, "review":user_review, "rating": user_rating})
         db.commit()
@@ -128,6 +130,7 @@ def review(movie_id):
     total_rating = int(average_score * rating_count)
     rating_count+=1
     average_score = (total_rating + user_rating)/rating_count
+
     db.execute("UPDATE movies SET rating_count = :rating_count, average_score = :average_score WHERE movieid = :movieid", {"rating_count":rating_count, "average_score":average_score, "movieid":movie_id})
     movie = db.execute("SELECT * FROM movies WHERE movieid = :movieid", {"movieid":movie_id}).fetchone()
     db.commit()
@@ -141,11 +144,6 @@ def edit_post():
 @app.route("/review_edit", methods = ["POST"])
 def review_edit():
     user_review =  request.form.get("user_review").strip()
-    #user_rating = int(request.form.get("rating"))
-    # users =  db.execute("SELECT * FROM users").fetchall()
-    #movie_data = db.execute("SELECT rating_count, average_score FROM movies WHERE movieid = :movieid",{"movieid":movie_id}).fetchone()
-    #rating_count = movie_data[0]
-    #average_score = movie_data[1]
     db.execute("UPDATE reviews SET review = :new_review WHERE review_id = :rev_id", {"new_review" : user_review,"rev_id":int(request.args.get('review_id'))})
     db.commit()
 
@@ -170,4 +168,5 @@ def get_movie_api(movie_id):
     movie_dict["movieid"] = movie_details.movieid
     movie_dict["review_count"] = movie_details.rating_count
     movie_dict["average_score"] = movie_details.average_score
+    
     return jsonify(movie_dict)

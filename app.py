@@ -22,7 +22,7 @@ def create_reviews_tables():
     db.commit()
 
 def create_users_table():
-    db.execute("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT, username VARCHAR(255), email VARCHAR(255), password VARCHAR(256), PRIMARY KEY(id))")
+    db.execute("CREATE TABLE IF NOT EXISTS users(id INT AUTO_INCREMENT, username VARCHAR(255), firstname VARCHAR(255), lastname VARCHAR(255), email VARCHAR(255), password VARCHAR(256), PRIMARY KEY(id))")
     db.commit()
 
 def show_reviews_table(movieid):
@@ -70,7 +70,7 @@ def dashboard():
                 return render_template("login.html", message = "A user with that username Already exists")
             if(request.form.get("username").isdigit()):
                 return render_template("login.html", message = "A username should have letters in it")
-            db.execute("INSERT INTO users (username, email, password) VALUES (:username, :email, :password)", {"username":request.form.get("username").strip(),"email":request.form.get("email").strip(), "password":hashlib.sha256(request.form.get("password").strip().encode()).hexdigest()})
+            db.execute("INSERT INTO users (username, firstname, lastname, email, password) VALUES (:username, :firstname, :lastname, :email, :password)", {"username":request.form.get("username").strip(),"firstname":request.form.get("firstname").strip() ,"lastname":request.form.get("lastname").strip() ,"email":request.form.get("email").strip(), "password":hashlib.sha256(request.form.get("password").strip().encode()).hexdigest()})
             db.commit()
             user = db.execute("SELECT * FROM users WHERE username = :username",{"username": request.form.get("username").strip()}).fetchone()
             session["user"] = user
